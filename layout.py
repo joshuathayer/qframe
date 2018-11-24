@@ -1,47 +1,7 @@
 from toolz.dicttoolz import get_in
-import functools
-
-COMPONENTS = {}
-
-
-def render(component):
-    print("Render! {}".format(component))
-    res = None
-
-    comp_name = component[0]
-    comp_id = None
-    if '/' in comp_name:
-        (comp_name, comp_id) = component[0].split('/')
-
-    if comp_id is None:
-        if isinstance(component[1], dict) and 'id' in component[1]:
-            comp_id = component[1]['id']
-
-    if comp_id is None:
-        raise ValueError("Components must have an ID")
-
-    if comp_name in COMPONENTS:
-        print("Woo it's wrapped")
-        comp_fn = COMPONENTS[comp_name]
-        res = render(comp_fn(*component[2:]))
-        res['id'] = comp_id
-    else:
-        comp_args = component[1]
-        comp_rest = component[2:]
-
-        if comp_name in ['label','button']:
-            res = {'component': comp_name,
-                   'id': comp_id,
-                   'text': comp_rest[0]}
-        elif comp_name in ['vbox']:
-            res = {'component': comp_name,
-                   'id': comp_id,
-                   'contains': list(map(render, comp_rest))}
-        else:
-            print("Dunno what that type is! {}".format(comp_type))
-
-    return res
-
+from render import render
+from components import component, REGISTERED_COMPONENTS
+from functools import wraps
 
 state = {'items': [{'title': 'do a thing', 'body': 'do all the thing'},
                    {'title': 'go surf', 'body': 'ideally at bolinas'}],
@@ -62,21 +22,28 @@ def sub(sub_name):
     path = subscriptions[sub_name]
     return get_in(path, state)
 
+class subscribes:
+    def __init__(self, subs):
+        self.subs = subs
 
-class component:
-    def __init__(self, func):
-        functools.update_wrapper(self, func)
-        self.func = func
-        COMPONENTS[self.func.__name__] = func
+    def __call__(self, f):
+        vals = {}
 
-    def __call__(self, *args, **kwargs):
-        print("Wrapped {}".format(self.func.__name__))
-        return self.func(*args, **kwargs)
+        for sub_name in self.subs:
+            path = subscriptions[sub_name]
+            vals[sub_name] = get_in(path, state)
+
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            return f(vals)
+
+        return wrapped
 
 @component
-def inbox():
+@subscribes(['inbox'])
+def inbox(s):
 
-    msgs = sub('inbox')
+    msgs = s['inbox']
     box = ['vbox/inbox-list', {}]
 
     for m in msgs:
@@ -92,14 +59,16 @@ def main_headline():
 @component
 def page():
 
-    page = ['vbox/container', {},
+    page = ['vbox/container',
              ['label/hello', {}, "hello world from a vbox"],
              ['main_headline/headline', {}],
              ['inbox/inbox', {}]]
+
     return page
 
 
-res = render(page())
+res = render(page(), REGISTERED_COMPONENTS)
+
 print(res)
 
 # class StateNode:

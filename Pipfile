@@ -17,5 +17,6 @@ flake8 = "*"
 [packages]
 toolz = "*"
 dictdiffer = "*"
-deepdiff = {ref = "master",git = "https://github.com/joshuathayer/deepdiff.git",editable = true}
+deepdiff = {editable = true,git = "https://github.com/joshuathayer/deepdiff.git",ref = "master"}
 "pyqt5" = "==5.11.3"
+dill = "*"
