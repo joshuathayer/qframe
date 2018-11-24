@@ -7,14 +7,17 @@ class subscribes:
         self.subs = subs
 
     def __call__(self, f):
+
         vals = {}
 
-        for sub_name in self.subs:
-            path = self.all_subscriptions[sub_name]
-            vals[sub_name] = state.get_in(path)
 
         @wraps(f)
         def wrapped(*args, **kwargs):
+
+            for sub_name in self.subs:
+                path = self.all_subscriptions[sub_name]
+                vals[sub_name] = state.get_in(path)
+
             return f(vals)
 
         return wrapped

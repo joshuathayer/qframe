@@ -1,11 +1,13 @@
 from toolz.dicttoolz import get_in
-from render import render
-from components import component, REGISTERED_COMPONENTS
+from components import component
 from subscriptions import subscribes
 import state
+import app
 
-app_state = {'items': [{'title': 'do a thing', 'body': 'do all the thing'},
-                       {'title': 'go surf', 'body': 'ideally at bolinas'}],
+app_state = {'items': [{'title': 'do a thing',
+                        'body': 'do all the thing'},
+                       {'title': 'go surf',
+                        'body': 'ideally at bolinas'}],
              'headline': {'main': "to-do!",
                           'subheadline': "my to-do list"},
              'inbox': [{'id': 'm0', 'msg': 'item0'},
@@ -16,13 +18,11 @@ subscriptions = {'main-headline': ['headline', 'main'],
                  'sub-headline': ['headline', 'subheadline'],
                  'inbox': ['inbox']}
 
-state.init_state(app_state)
-
 @component
 @subscribes(['inbox'], subscriptions)
-def inbox(s):
+def inbox(subs):
 
-    msgs = s['inbox']
+    msgs = subs['inbox']
     box = ['vbox/inbox-list', {}]
 
     for m in msgs:
@@ -32,22 +32,28 @@ def inbox(s):
 
 @component
 @subscribes(['main-headline'], subscriptions)
-def main_headline(s):
+def main_headline(subs):
 
-    headline = s['main-headline']
+    headline = subs['main-headline']
     return ['label/main_headline', {}, headline]
 
 @component
 def page():
 
     page = ['vbox/container',
-             ['label/hello', "hello world from a vbox"],
+             ['label/hello', {'text-color': 'blue'},
+              "hello world from a vbox"],
              ['main_headline/headline'],
              ['inbox/inbox']]
 
     return page
 
+app.set_top(page)
+state.init_state(app_state)
 
-res = render(page(), REGISTERED_COMPONENTS)
+def append_elem(x):
+    x.append({'id': 'm3',
+              'msg': "This is the fourth message"})
+    return x
 
-print(res)
+state.update_in(['inbox'], append_elem)
