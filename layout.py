@@ -1,26 +1,41 @@
 from toolz.dicttoolz import get_in
 import functools
 
+COMPONENTS = {}
+
+
 def render(component):
     print("Render! {}".format(component))
     res = None
 
     comp_name = component[0]
+    comp_id = None
     if '/' in comp_name:
         (comp_name, comp_id) = component[0].split('/')
 
+    if comp_id is None:
+        if isinstance(component[1], dict) and 'id' in component[1]:
+            comp_id = component[1]['id']
+
+    if comp_id is None:
+        raise ValueError("Components must have an ID")
+
     if comp_name in COMPONENTS:
+        print("Woo it's wrapped")
         comp_fn = COMPONENTS[comp_name]
         res = render(comp_fn(*component[2:]))
+        res['id'] = comp_id
     else:
         comp_args = component[1]
         comp_rest = component[2:]
 
         if comp_name in ['label','button']:
             res = {'component': comp_name,
+                   'id': comp_id,
                    'text': comp_rest[0]}
         elif comp_name in ['vbox']:
             res = {'component': comp_name,
+                   'id': comp_id,
                    'contains': list(map(render, comp_rest))}
         else:
             print("Dunno what that type is! {}".format(comp_type))
@@ -47,7 +62,6 @@ def sub(sub_name):
     path = subscriptions[sub_name]
     return get_in(path, state)
 
-COMPONENTS = {}
 
 class component:
     def __init__(self, func):
@@ -63,7 +77,7 @@ class component:
 def inbox():
 
     msgs = sub('inbox')
-    box = ['vbox', {}]
+    box = ['vbox/inbox-list', {}]
 
     for m in msgs:
         box.append(['label', {'id': m['id']}, m['msg']])
