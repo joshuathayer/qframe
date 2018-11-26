@@ -13,10 +13,8 @@ coverage = "*"
 pytest-cov = "*"
 pytest-random-order = "*"
 flake8 = "*"
+reactive-qt = {editable = true,git = "https://github.com/joshuathayer/reactive-qt.git",ref = "master"}
+"pyqt5" = "==5.11.3"
 
 [packages]
 toolz = "*"
-dictdiffer = "*"
-deepdiff = {editable = true,git = "https://github.com/joshuathayer/deepdiff.git",ref = "master"}
-"pyqt5" = "==5.11.3"
-dill = "*"

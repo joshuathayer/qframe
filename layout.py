@@ -1,8 +1,10 @@
-from toolz.dicttoolz import get_in
 from components import component
 from subscriptions import subscribes
+
 import state
 import app
+
+app = app.App()
 
 app_state = {'items': [{'title': 'do a thing',
                         'body': 'do all the thing'},
@@ -49,11 +51,10 @@ def page():
     return page
 
 app.set_top(page)
-state.init_state(app_state)
 
-def append_elem(x):
-    x.append({'id': 'm3',
-              'msg': "This is the fourth message"})
-    return x
+# def append_elem(x):
+#     x.append({'id': 'm3',
+#               'msg': "This is the fourth message"})
+#     return x
 
-state.update_in(['inbox'], append_elem)
+# state.update_in(['inbox'], append_elem)
