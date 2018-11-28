@@ -53,11 +53,3 @@ def page(subs):
             ['inbox/inbox', {}]]
 
     return page
-
-
-# def append_elem(x):
-#     x.append({'id': 'm3',
-#               'msg': "This is the fourth message"})
-#     return x
-
-# state.update_in(['inbox'], append_elem)
