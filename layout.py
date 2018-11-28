@@ -9,11 +9,13 @@ app_state = {'items': [{'title': 'do a thing',
                           'subheadline': "my to-do list"},
              'inbox': [{'id': 'm0', 'msg': 'item0'},
                        {'id': 'm1', 'msg': 'item1'},
-                       {'id': 'm2', 'msg': 'item2'}]}
+                       {'id': 'm2', 'msg': 'item2'}],
+             'time': 0}
 
 subscriptions = {'main-headline': ['headline', 'main'],
                  'sub-headline': ['headline', 'subheadline'],
-                 'inbox': ['inbox']}
+                 'inbox': ['inbox'],
+                 'time': ['time']}
 
 @component
 @subscribes(['inbox'], subscriptions)
@@ -35,14 +37,20 @@ def main_headline(subs):
     return ['label/main_headline', {}, headline]
 
 @component
+@subscribes(['time'], subscriptions)
+def timer(subs):
+    return ['label/currenttime', {}, str(subs['time'])]
+
+@component
 @subscribes([], subscriptions)
 def page(subs):
 
     page = ['vbox/container',
-             ['label/hello', {'text-color': 'blue'},
+            ['label/hello', {'text-color': 'blue'},
               "hello world from a vbox", {}],
-             ['main_headline/headline', {}],
-             ['inbox/inbox', {}]]
+            ['main_headline/headline', {}],
+            ['timer/timer', {}],
+            ['inbox/inbox', {}]]
 
     return page
 

@@ -8,6 +8,10 @@ import layout
 import app
 import state
 
+import spot.system
+from datetime import datetime
+import time
+
 app = app.App()
 
 qapp = QApplication([])
@@ -16,6 +20,8 @@ vbox = QVBoxLayout()
 
 
 app.set_top(layout.page)
+
+
 
 # this should go into reactive-qt
 class StatefulReactiveQtAppWindow(QWidget):
@@ -42,6 +48,27 @@ appwindow.setLayout(vbox)
 
 # initialize db with state
 db = state.DB(app, layout.app_state)
+
+
+
+class Timer:
+    def act(self, msg, tell, create):
+        print("Timer")
+        time.sleep(1)
+        tell('updater','click')
+        tell('timer','click')
+
+class DBUpdater:
+    def __init__(self, db):
+        self.db = db
+
+    def act(self, msg, tell, create):
+        self.db.assoc_in(['time'], time.time())
+
+system = spot.system.ActorSystem(qapp)
+system.create_actor(Timer(), 'timer')
+system.create_actor(DBUpdater(db), 'updater')
+system.tell('timer','click')
 
 # simulate updating db
 db.assoc_in(['headline','main'], "These are my TODOs")
