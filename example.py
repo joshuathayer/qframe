@@ -38,8 +38,13 @@ appwindow = StatefulReactiveQtAppWindow({'id': 'container',
 
 app.update_cb = lambda x: appwindow.next_layout(x)
 
-
 appwindow.setLayout(vbox)
+
+# initialize db with state
 db = state.DB(app, layout.app_state)
+
+# simulate updating db
+db.assoc_in(['headline','main'], "These are my TODOs")
+
 appwindow.show()
 qapp.exec_()
