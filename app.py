@@ -9,10 +9,8 @@ class App:
     def set_top(self, c):
         self.top = c
 
-    def on_update(self):
-        print("DB updated. New UI")
-        new_layout = render(self.top(), REGISTERED_COMPONENTS)
-        print(new_layout)
+    def on_update(self, db):
+        new_layout = render(self.top(db), [REGISTERED_COMPONENTS, db])
 
         if self.update_cb is not None:
             self.update_cb(new_layout)

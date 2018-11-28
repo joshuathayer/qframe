@@ -5,10 +5,19 @@ from reactive_qt.core import render_diff
 import render
 import layout
 
+import app
+import state
+
+app = app.App()
+
 qapp = QApplication([])
 window = QWidget()
 vbox = QVBoxLayout()
 
+
+app.set_top(layout.page)
+
+# this should go into reactive-qt
 class StatefulReactiveQtAppWindow(QWidget):
     def __init__(self, initial_layout=[], initial_elements={}):
         super().__init__()
@@ -16,7 +25,6 @@ class StatefulReactiveQtAppWindow(QWidget):
         self.current_layout = initial_layout
 
     def next_layout(self, layout):
-        print("NEXT LAYOUT!", layout)
         self.elements = render_diff(
             self.current_layout,
             layout,
@@ -24,12 +32,14 @@ class StatefulReactiveQtAppWindow(QWidget):
 
         self.current_layout = layout
 
-appwindow = StatefulReactiveQtAppWindow({'id': 'container', 'contains': []},
+appwindow = StatefulReactiveQtAppWindow({'id': 'container',
+                                         'contains': []},
                                         {'container': vbox})
 
-layout.app.update_cb = lambda x: appwindow.next_layout(x)
+app.update_cb = lambda x: appwindow.next_layout(x)
+
 
 appwindow.setLayout(vbox)
-layout.state.init_state(layout.app_state, layout.app)
+db = state.DB(app, layout.app_state)
 appwindow.show()
 qapp.exec_()

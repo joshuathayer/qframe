@@ -1,4 +1,4 @@
-import state
+from toolz.dicttoolz import get_in
 from functools import wraps
 
 class subscribes:
@@ -10,13 +10,11 @@ class subscribes:
 
         vals = {}
 
-
         @wraps(f)
-        def wrapped(*args, **kwargs):
-
+        def wrapped(state, *args, **kwargs):
             for sub_name in self.subs:
                 path = self.all_subscriptions[sub_name]
-                vals[sub_name] = state.get_in(path)
+                vals[sub_name] = get_in(path, state)
 
             return f(vals)
 

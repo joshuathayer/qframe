@@ -1,11 +1,6 @@
 from components import component
 from subscriptions import subscribes
 
-import state
-import app
-
-app = app.App()
-
 app_state = {'items': [{'title': 'do a thing',
                         'body': 'do all the thing'},
                        {'title': 'go surf',
@@ -40,17 +35,17 @@ def main_headline(subs):
     return ['label/main_headline', {}, headline]
 
 @component
-def page():
+@subscribes([], subscriptions)
+def page(subs):
 
     page = ['vbox/container',
              ['label/hello', {'text-color': 'blue'},
-              "hello world from a vbox"],
-             ['main_headline/headline'],
-             ['inbox/inbox']]
+              "hello world from a vbox", {}],
+             ['main_headline/headline', {}],
+             ['inbox/inbox', {}]]
 
     return page
 
-app.set_top(page)
 
 # def append_elem(x):
 #     x.append({'id': 'm3',

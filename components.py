@@ -8,5 +8,5 @@ class component:
         self.func = func
         REGISTERED_COMPONENTS[self.func.__name__] = func
 
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
+    def __call__(self, db, *args, **kwargs):
+        return self.func(db, *args, **kwargs)

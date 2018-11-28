@@ -1,6 +1,7 @@
 from toolz.functoolz import partial, flip
 
-def render(component, components):
+def render(component, state):
+    [components, db] = state
     res = None
 
     comp_name = component[0]
@@ -17,8 +18,8 @@ def render(component, components):
 
     if comp_name in components:
         comp_fn = components[comp_name]
-        comp_res = comp_fn(*component[2:])
-        res = render(comp_res, components)
+        comp_res = comp_fn(db, *component[2:])
+        res = render(comp_res, [components, db])
         res['id'] = comp_id
     else:
         if isinstance(component[1], dict):
@@ -36,7 +37,7 @@ def render(component, components):
             res = {'component': comp_name,
                    'id': comp_id,
                    'contains': list(
-                       map(partial(flip(render), components),
+                       map(partial(flip(render), [components, db]),
                            comp_rest))}
         else:
             print("Dunno what that type is! {}".format(comp_name))
