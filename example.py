@@ -55,6 +55,9 @@ app.update_cb = lambda x: appwindow.next_layout(x)
 # set Qt widget's initial layout (an empty vbox)
 appwindow.setLayout(vbox)
 
+system = spot.system.ActorSystem(qapp)
+app.event_cb = lambda event: system.tell('event', event)
+
 # initialize db with state
 db = state.DB(app, layout.app_state)
 
@@ -64,19 +67,44 @@ class Timer:
     def act(self, msg, tell, create):
         print("Timer")
         time.sleep(1)
-        tell('updater','click')
-        tell('timer','click')
+        tell('updater', ['tick'])
+        tell('timer','tick')
 
 class DBUpdater:
     def __init__(self, db):
         self.db = db
 
     def act(self, msg, tell, create):
-        self.db.assoc_in(['time'], time.time())
 
-system = spot.system.ActorSystem(qapp)
+        msg_key = msg[0]
+
+        if msg_key == 'tick':
+            self.db.assoc_in(['time'], time.time())
+        elif msg_key == 'input':
+            self.db.assoc_in(['incoming_text'], msg[1])
+        elif msg_key == 'submit':
+            text = self.db.get_in(['incoming_text'])
+            inbox = self.db.get_in(['inbox'])
+            index = len(inbox)
+            inbox.append({'id': "m" + str(index), 'msg': text})
+            self.db.assoc_in(['inbox'], inbox)
+            self.db.assoc_in(['incoming_text'], "")
+
+class EventCatcher:
+    def act(self, msg, tell, create):
+        print("Got an _event_!", msg)
+        event_key = msg[0]
+
+        if event_key == 'input-changed':
+            tell('updater', ['input', msg[1]])
+        elif event_key == 'submit-clicked':
+            tell('updater', ['submit'])
+
+
 system.create_actor(Timer(), 'timer')
 system.create_actor(DBUpdater(db), 'updater')
+system.create_actor(EventCatcher(), 'event')
+
 
 # kick off the actor network
 system.tell('timer','click')

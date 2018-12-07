@@ -1,6 +1,10 @@
-from toolz.functoolz import partial, flip
+from toolz.functoolz import partial, flip, memoize
 
-def render(component, state):
+@memoize(key=lambda args, kwargs: args[0])
+def make_event_cb(event_key, event_cb):
+    return lambda x: event_cb([event_key, x])
+
+def render(component, event_cb, state):
     [components, db] = state
     res = None
 
@@ -19,7 +23,7 @@ def render(component, state):
     if comp_name in components:
         comp_fn = components[comp_name]
         comp_res = comp_fn(db, *component[2:])
-        res = render(comp_res, [components, db])
+        res = render(comp_res, event_cb, [components, db])
         res['id'] = comp_id
     else:
         if isinstance(component[1], dict):
@@ -29,15 +33,31 @@ def render(component, state):
             comp_args = {}
             comp_rest = component[1:]
 
-        if comp_name in ['label','button']:
+        if comp_name in ['label']:
             res = {'component': comp_name,
                    'id': comp_id,
                    'text': comp_rest[0]}
-        elif comp_name in ['vbox']:
+        elif comp_name in ['pushbutton']:
+            res = {'component': comp_name,
+                   'id': comp_id,
+                   'text': comp_rest[0]}
+            if 'on-click' in comp_args:
+                res['on-click'] = make_event_cb(comp_args['on-click'],
+                                                event_cb)
+        elif comp_name in ['lineedit']:
+            res = {'component': comp_name,
+                   'id': comp_id,
+                   'text': comp_rest[0]}
+            if 'on-edit' in comp_args:
+                res['on-edit'] = make_event_cb(comp_args['on-edit'],
+                                               event_cb)
+        elif comp_name in ['vbox', 'hbox']:
             res = {'component': comp_name,
                    'id': comp_id,
                    'contains': list(
-                       map(partial(flip(render), [components, db]),
+                       map(lambda comp: render(comp,
+                                               event_cb,
+                                               [components, db]),
                            comp_rest))}
         else:
             print("Dunno what that type is! {}".format(comp_name))

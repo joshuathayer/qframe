@@ -9,7 +9,7 @@ class DB():
         self.app.on_update(self.store)
 
     def get_in(self, ks):
-        return(d.get_in(ks, self.store))
+        return(d.get_in(ks, self.store, None))
 
     def assoc_in(self, ks, val):
         self.store = d.assoc_in(self.store, ks, val)

@@ -11,6 +11,7 @@ app_state = {'items': [{'title': 'do a thing',
              'inbox': [{'id': 'm0', 'msg': 'item0'},
                        {'id': 'm1', 'msg': 'item1'},
                        {'id': 'm2', 'msg': 'item2'}],
+             'incoming_text': "",
              'time': 0}
 
 # a map of names to paths into the database. our components can
@@ -19,7 +20,8 @@ app_state = {'items': [{'title': 'do a thing',
 subscriptions = {'main-headline': ['headline', 'main'],
                  'sub-headline': ['headline', 'subheadline'],
                  'inbox': ['inbox'],
-                 'time': ['time']}
+                 'time': ['time'],
+                 'incoming_text': ['incoming_text']}
 
 @component
 @subscribes(['inbox'], subscriptions)
@@ -46,6 +48,13 @@ def timer(subs):
     return ['label/currenttime', {}, str(subs['time'])]
 
 @component
+@subscribes(['incoming_text'], subscriptions)
+def text_input(subs):
+    return ['lineedit/todoinput',
+            {'on-edit': 'input-changed'},
+            str(subs['incoming_text'])]
+
+@component
 @subscribes([], subscriptions)
 def page(subs):
 
@@ -53,7 +62,14 @@ def page(subs):
             ['label/hello', {'text-color': 'blue'},
               "hello world from a vbox", {}],
             ['main_headline/headline', {}],
+            ['inbox/inbox', {}],
             ['timer/timer', {}],
-            ['inbox/inbox', {}]]
+            ['hbox/inputbox', {},
+             ['text_input/text_input'],
+             ['pushbutton/todosubmit',
+              {'on-click': 'submit-clicked'},
+              "Submit"]
+            ],
+    ]
 
     return page
