@@ -1,5 +1,5 @@
-from render import render
-from components import component, REGISTERED_COMPONENTS
+from qframe.render import render
+from qframe.components import component, REGISTERED_COMPONENTS
 
 class App:
     def __init__(self, update_cb = None, event_cb = None):
