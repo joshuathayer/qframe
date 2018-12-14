@@ -13,8 +13,8 @@ coverage = "*"
 pytest-cov = "*"
 pytest-random-order = "*"
 flake8 = "*"
-reactive-qt = {editable = true,git = "https://github.com/joshuathayer/reactive-qt.git",ref = "master"}
-spot = {editable = true,git = "https://github.com/joshuathayer/spot.git",ref = "master"}
+reactive-qt = {editable = true, git = "https://github.com/joshuathayer/reactive-qt.git",ref = "master"}
+spot = {editable = true, git = "https://github.com/joshuathayer/spot.git",ref = "master"}
 
 "pyqt5" = "==5.11.3"
 
